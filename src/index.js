@@ -3,52 +3,16 @@ import { formatDistanceToNow } from "date-fns";
 
 class Todo {
 
-    #title
-    #description
-    #deadline
-    #priority
+
     constructor (title, description, deadline, priority) {
-        this.#title = title;
-        this.#description = description;
-        this.#deadline = deadline;
-        this.#priority = priority;
-    }
-
-    get title () {
-        return this.#title
-    }
-
-    get description () {
-        return this.#description
-    }
-
-    get deadline () {
-        return this.#deadline
-    }
-
-    get priority () {
-        return this.#priority
-    }
-
-    set title(title) {
-        this.#title = title;
-    }
-
-    
-    set description(description) {
-        this.#description = description
-    }
-
-    set deadline(deadline) {
-        this.#deadline = deadline
-    }
-
-    set priority(priority) {
-        this.#priority = priority
+        this.title = title;
+        this.description = description;
+        this.deadline = deadline;
+        this.priority = priority;
     }
 
     getTimeLeft () {
-        return formatDistanceToNow(new Date(this.#deadline), {"addSuffix" : true});
+        return formatDistanceToNow(new Date(this.deadline), {"addSuffix" : true});
     }
 
     toJSON () {
@@ -58,6 +22,10 @@ class Todo {
         deadline: this.deadline,
         priority: this.priority
         };
+    }
+
+    static fromObject (todoObject) {
+        return new Todo(todoObject.title, todoObject.description, todoObject.deadline, todoObject.priority);
     }
 }
 
@@ -80,22 +48,45 @@ class Project {
     toJSON () {
         return {name: this.name, todos:this.todos};
     }
+
+    static fromObject (projectObject) {
+        const project = new Project(projectObject.name);
+        const todos = projectObject.todos;
+        for (const todoId in todos) {
+            project.addTodo(todoId, Todo.fromObject(todos[todoId]));
+        }
+        return project;
+    }
 }
 
 class logicHandler {
     #currProjectId;
     #projects = {}
+    #storageFlag = false;
 
-    addProject (projectId, name) {
+
+    set storageFlag (boolValue) {
+        this.#storageFlag = boolValue;
+        this.#saveContents()
+    }
+
+    get storageFlag () {
+        return this.#storageFlag;
+    }
+
+    addProject(projectId, name) {
         this.#projects[projectId] = new Project(name);
+        this.#saveContents()
     }
 
     removeProject (projectId) {
         delete this.#projects[projectId];
+        this.#saveContents()
     }
 
     addTodo ( projectId, todoId, todo) {
         this.#projects[projectId].addTodo(todoId, todo);
+        this.#saveContents()
     }
 
     editTodo (projectId, todoId, title, deadline, description) {
@@ -103,19 +94,26 @@ class logicHandler {
         todo.title = title;
         todo.deadline = deadline;
         todo.description = description;
+        this.#saveContents()
         return todo.getTimeLeft();
     }
 
     removeTodo ( projectId, todoId) {
-        delete this.#projects[projectId].removeTodo(todoId);
+        this.#projects[projectId].removeTodo(todoId);
+        this.#saveContents()
     } 
 
     changeCurrentProjectId ( projectId ) {
         this.#currProjectId = projectId;
+        this.#saveContents()
     }
 
     getCurrentProjectId () {
         return this.#currProjectId;
+    }
+
+    getProjectArray () {
+        return Object.entries(this.#projects);
     }
 
     getTodoArray ( projectId ) {
@@ -124,22 +122,40 @@ class logicHandler {
     
     removeCurrentProject () {
         this.removeProject(this.#currProjectId);
+        this.#saveContents();
     }
 
+    toJSON () {
+        return {currProjectId: this.#currProjectId, projects: this.#projects};
+    }
+
+    #saveContents () {
+        try {
+            if (this.storageFlag) {
+                localStorage.setItem("appData", JSON.stringify(this));
+                console.log("Saving");
+            }
+        }
+        catch (e) {
+            if (e.name === 'QuotaExceededError') {
+            }
+        }
+    }
+
+    static fromObject (handlerObject) {
+        const handler = new logicHandler();
+        handler.#currProjectId = handlerObject.currProjectId;
+        const projects = handlerObject.projects;
+        for ( const projectId in projects) {
+            handler.#projects[projectId] = Project.fromObject(projects[projectId]);
+        }
+        return handler;
+    }
 }
 
 class uiHandler {
 
     constructor () {
-        try {
-            localStorage.setItem("__test__", "__hello__");
-            localStorage.removeItem("__test__");
-            this.localStorageFlag = true;
-        }
-        catch {
-            this.localStorageFlag = false;
-        }
-        this.handler = new logicHandler();
         this.projectButton = document.querySelector(".project-button");
         this.projectDialog = document.querySelector(".project-dialog");
         this.projectForm = document.querySelector(".project-dialog > form");
@@ -159,14 +175,43 @@ class uiHandler {
         this.projectSaveButton.addEventListener( "click", (e) => this.saveProject(e) );
         this.todoSaveButton.addEventListener( "click", (e) => this.saveTodo(e) );
         this.sortApplyButton.addEventListener( "click", (e) => this.sortTodos(e) );
+        try {
+            localStorage.setItem("__test__", "__hello__");
+            localStorage.removeItem("__test__");
+            this.localStorageFlag = true;
+        }
+        catch {
+            this.localStorageFlag = false;
+        }
+        if (this.localStorageFlag){
+            const appData = localStorage.getItem("appData");
+            if (appData){
+                this.handler = logicHandler.fromObject(JSON.parse(appData));
+                this.handler.storageFlag = true;
+                this.displayInitially();
+            }
+            else {
+                this.handler = new logicHandler();
+                this.handler.storageFlag = true;
+                const projectId = Math.random().toString(36).substring(2, 9);
+                this.saveProjectComponents( projectId, "Default");
+                this.handler.changeCurrentProjectId(projectId);
+                const todo = new Todo("A title", "A description goes here", "2026-08-30T14:30", "High");
+                const todoId = Math.random().toString(36).substring(2, 9);
+                this.saveTodoCards("title", "description", todo.getTimeLeft(), "High", todoId);
+                this.saveTodoLogic(todoId, todo);
+            }
+        }
+    }
 
-        const projectId = Math.random().toString(36).substring(2, 9);
-        this.saveProjectComponents( projectId, "Default");
-        this.handler.changeCurrentProjectId(projectId);
-        const todo = new Todo("A title", "A description goes here", "2026-08-30T14:30", "High");
-        const todoId = Math.random().toString(36).substring(2, 9);
-        this.saveTodoCards("title", "description", todo.getTimeLeft(), "High", todoId);
-        this.saveTodoLogic(todoId, todo);
+    displayInitially () {
+        const projectArray = this.handler.getProjectArray();
+        for (const [projectId, project] of projectArray) {
+            this.saveProjectCard(projectId, project.name);
+        }
+        const projectId = this.handler.getCurrentProjectId();
+        const todoArray = this.handler.getTodoArray( projectId );
+        this.displayTodos(todoArray);
     }
 
     displayProjectDialog (e) {
@@ -203,9 +248,7 @@ class uiHandler {
     }
 
     saveProjectComponents (projectId, projectName ) {
-        const projectCard = this.produceProjectCard( projectId, projectName );
-        projectCard.addEventListener("click", (e) => this.displayProject(e));
-        this.projects.appendChild(projectCard);
+        this.saveProjectCard( projectId, projectName );
         this.handler.addProject( projectId, projectName );
     }
 
@@ -217,12 +260,13 @@ class uiHandler {
         this.handler.addTodo(this.handler.getCurrentProjectId(), todoId, todo);
     }
 
-    produceProjectCard ( projectId, projectName ) {
+    saveProjectCard ( projectId, projectName ) {
         const projectCard = document.createElement("div");
         projectCard.textContent = projectName;
         projectCard.dataset.id = projectId;
-        projectCard.classList.add(".project-card");
-        return projectCard;
+        projectCard.classList.add("project-card");
+        projectCard.addEventListener("click", (e) => this.displayProject(e));
+        this.projects.appendChild(projectCard);
     }
 
     produceTodoCard ( title, description, priority, timeLeft, todoId) { 
@@ -366,10 +410,10 @@ class uiHandler {
         let todoArray = this.handler.getTodoArray( this.handler.getCurrentProjectId() );
         let sortFunction;
         if ( sortBy === "default" ) return;
-        else if ( sortBy === "priority" ) { sortFunction = (a, b) => {
+        else if ( sortBy === "priority" ) { 
             const rank = { High: 0, Medium: 1, Low: 2 };
             sortFunction = (a, b) => rank[a[1].priority] - rank[b[1].priority];
-        } }
+        }
         else if ( sortBy === "date" ) { sortFunction = (a, b) => new Date(a[1].deadline) - new Date(b[1].deadline) }
         todoArray = todoArray.sort(sortFunction);
         this.displayTodos( todoArray );

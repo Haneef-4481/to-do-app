@@ -28,6 +28,18 @@ button {
     background-color: yellow;
     grid-row: 2;
     grid-column: 1;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.project-button {
+    margin: 10px;
+}
+
+.project-card {
+    margin: 8px;
+    padding: 8px;
+    border: 2px solid black;
 }
 
 .list-container {
@@ -40,12 +52,19 @@ button {
 .top {
     display: flex;
     justify-content: space-between;
+    margin: 25px;
 }
 
 .todo-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.todo-container {
+    margin: 12px;
+    padding: 10px;
+    border: 2px solid black;
 }
 
 .todo-bottom {
