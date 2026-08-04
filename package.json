@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "css-loader": "^7.1.4",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.8",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.109.0",
+    "webpack-cli": "^7.2.1",
+    "webpack-dev-server": "^6.0.0",
+    "webpack-merge": "^6.0.1"
+  },
+  "scripts": {
+    "start": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0"
+  }
+}

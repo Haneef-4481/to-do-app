@@ -1,0 +1,73 @@
+body {
+    display: grid;
+    grid-template: 1fr 5fr / 1fr 5fr;
+    height: 100vh;
+    margin: 0px;
+}
+
+button {
+    cursor: pointer;
+}
+
+.header {
+    background-color: red;
+    grid-row: 1;
+    grid-column: 1 / 3;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 3rem;
+    padding: 0px 30px;
+}
+
+.header > svg {
+    width: 4rem;
+}
+
+.sidebar {
+    background-color: yellow;
+    grid-row: 2;
+    grid-column: 1;
+}
+
+.list-container {
+    background-color: aqua;
+    grid-row: 2;
+    grid-column: 2; 
+    padding: 4rem;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+}
+
+.todo-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.todo-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.todo-right {
+    display: flex;
+    gap: 20px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px
+}
+
+.buttons svg {
+    width: 1.3rem;
+}
+
+.hidden-description, .hidden {
+    display: none;
+}
