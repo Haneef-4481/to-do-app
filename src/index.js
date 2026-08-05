@@ -94,22 +94,26 @@ class logicHandler {
         todo.title = title;
         todo.deadline = deadline;
         todo.description = description;
-        this.#saveContents()
+        this.#saveContents();
         return todo.getTimeLeft();
     }
 
     removeTodo ( projectId, todoId) {
         this.#projects[projectId].removeTodo(todoId);
-        this.#saveContents()
+        this.#saveContents();
     } 
 
     changeCurrentProjectId ( projectId ) {
         this.#currProjectId = projectId;
-        this.#saveContents()
+        this.#saveContents();
     }
 
     getCurrentProjectId () {
         return this.#currProjectId;
+    }
+
+    getCurrentProjectName () {
+        return this.#projects[this.#currProjectId].name;
     }
 
     getProjectArray () {
@@ -119,10 +123,17 @@ class logicHandler {
     getTodoArray ( projectId ) {
         return Object.entries(this.#projects[projectId].todos);
     }
-    
-    removeCurrentProject () {
-        this.removeProject(this.#currProjectId);
-        this.#saveContents();
+
+    getAppropriateProjectId ( projectId ) {
+        const keys = Object.keys(this.#projects);
+        const index = keys.indexOf( projectId );
+        if (index === 0){
+            return keys[1]
+        }
+        else if (index === keys.length - 1){
+            return keys.at(-2);
+        }
+        return keys[index + 1];
     }
 
     toJSON () {
@@ -166,6 +177,10 @@ class uiHandler {
         this.todoSaveButton = document.querySelector(".todo-save");
         this.sortDropDown = document.querySelector("#sorting");
         this.sortApplyButton = document.querySelector("#sort-apply");
+        this.projectName = document.querySelector("#project-name");
+        this.removeProjectDialog = document.querySelector(".remove-project-dialog");
+        this.removeProjectYes = document.querySelector("#yes");
+        this.removeProjectNo = document.querySelector("#no");
 
         this.projects = document.querySelector(".projects");
         this.todos = document.querySelector(".todos");
@@ -175,6 +190,9 @@ class uiHandler {
         this.projectSaveButton.addEventListener( "click", (e) => this.saveProject(e) );
         this.todoSaveButton.addEventListener( "click", (e) => this.saveTodo(e) );
         this.sortApplyButton.addEventListener( "click", (e) => this.sortTodos(e) );
+        this.removeProjectYes.addEventListener( "click", (e) => this.removeProjectComponents(e));
+        this.removeProjectNo.addEventListener( "click", (e) => this.removeProjectDialog.close());
+
         try {
             localStorage.setItem("__test__", "__hello__");
             localStorage.removeItem("__test__");
@@ -252,6 +270,17 @@ class uiHandler {
         this.handler.addProject( projectId, projectName );
     }
 
+    removeProjectComponents ( event ) {
+        const pastId = this.removeProjectComponent.dataset.id;
+        const projectId = this.handler.getAppropriateProjectId(pastId);
+        
+        this.removeProjectComponent.remove();
+        this.handler.removeProject(pastId);
+
+        this.removeProjectDialog.close();
+        this.displayProject(projectId);
+    }
+
     saveTodoCards ( title, description, timeLeft, priority, todoId ) {
         this.todos.appendChild(this.produceTodoCard( title, description, priority, timeLeft , todoId));
     }
@@ -265,7 +294,13 @@ class uiHandler {
         projectCard.textContent = projectName;
         projectCard.dataset.id = projectId;
         projectCard.classList.add("project-card");
-        projectCard.addEventListener("click", (e) => this.displayProject(e));
+
+        const bin = document.createElement("button");
+        bin.classList.add("project-bin", "hide-project");
+        bin.innerHTML = `<svg viewBox="0 0 48 48" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><title></title><path d="M42,3H28a2,2,0,0,0-2-2H22a2,2,0,0,0-2,2H6A2,2,0,0,0,6,7H42a2,2,0,0,0,0-4Z"></path><path d="M39,9a2,2,0,0,0-2,2V43H11V11a2,2,0,0,0-4,0V45a2,2,0,0,0,2,2H39a2,2,0,0,0,2-2V11A2,2,0,0,0,39,9Z"></path><path d="M21,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path><path d="M31,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path></g></svg>`;
+        
+        projectCard.appendChild(bin);
+        projectCard.addEventListener("click", (e) => this.handleProject(e));
         this.projects.appendChild(projectCard);
     }
 
@@ -308,9 +343,9 @@ class uiHandler {
         timeInput.classList.add("time-input", "hidden", "to-be-hidden");
         buttons.classList.add("buttons");
         edit.classList.add("edit");
-        edit.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M15.8787 3.70705C17.0503 2.53547 18.9498 2.53548 20.1213 3.70705L20.2929 3.87862C21.4645 5.05019 21.4645 6.94969 20.2929 8.12126L18.5556 9.85857L8.70713 19.7071C8.57897 19.8352 8.41839 19.9261 8.24256 19.9701L4.24256 20.9701C3.90178 21.0553 3.54129 20.9554 3.29291 20.7071C3.04453 20.4587 2.94468 20.0982 3.02988 19.7574L4.02988 15.7574C4.07384 15.5816 4.16476 15.421 4.29291 15.2928L14.1989 5.38685L15.8787 3.70705ZM18.7071 5.12126C18.3166 4.73074 17.6834 4.73074 17.2929 5.12126L16.3068 6.10738L17.8622 7.72357L18.8787 6.70705C19.2692 6.31653 19.2692 5.68336 18.8787 5.29283L18.7071 5.12126ZM16.4477 9.13804L14.8923 7.52185L5.90299 16.5112L5.37439 18.6256L7.48877 18.097L16.4477 9.13804Z" fill="#000000"></path> </g></svg>`;
+        edit.innerHTML = `<svg viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M15.8787 3.70705C17.0503 2.53547 18.9498 2.53548 20.1213 3.70705L20.2929 3.87862C21.4645 5.05019 21.4645 6.94969 20.2929 8.12126L18.5556 9.85857L8.70713 19.7071C8.57897 19.8352 8.41839 19.9261 8.24256 19.9701L4.24256 20.9701C3.90178 21.0553 3.54129 20.9554 3.29291 20.7071C3.04453 20.4587 2.94468 20.0982 3.02988 19.7574L4.02988 15.7574C4.07384 15.5816 4.16476 15.421 4.29291 15.2928L14.1989 5.38685L15.8787 3.70705ZM18.7071 5.12126C18.3166 4.73074 17.6834 4.73074 17.2929 5.12126L16.3068 6.10738L17.8622 7.72357L18.8787 6.70705C19.2692 6.31653 19.2692 5.68336 18.8787 5.29283L18.7071 5.12126ZM16.4477 9.13804L14.8923 7.52185L5.90299 16.5112L5.37439 18.6256L7.48877 18.097L16.4477 9.13804Z" ></path> </g></svg>`;
         bin.classList.add("bin");
-        bin.innerHTML = `<svg fill="#000000" viewBox="0 0 48 48" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><title></title><path d="M42,3H28a2,2,0,0,0-2-2H22a2,2,0,0,0-2,2H6A2,2,0,0,0,6,7H42a2,2,0,0,0,0-4Z"></path><path d="M39,9a2,2,0,0,0-2,2V43H11V11a2,2,0,0,0-4,0V45a2,2,0,0,0,2,2H39a2,2,0,0,0,2-2V11A2,2,0,0,0,39,9Z"></path><path d="M21,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path><path d="M31,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path></g></svg>`;
+        bin.innerHTML = `<svg viewBox="0 0 48 48" data-name="Layer 1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><title></title><path d="M42,3H28a2,2,0,0,0-2-2H22a2,2,0,0,0-2,2H6A2,2,0,0,0,6,7H42a2,2,0,0,0,0-4Z"></path><path d="M39,9a2,2,0,0,0-2,2V43H11V11a2,2,0,0,0-4,0V45a2,2,0,0,0,2,2H39a2,2,0,0,0,2-2V11A2,2,0,0,0,39,9Z"></path><path d="M21,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path><path d="M31,37V19a2,2,0,0,0-4,0V37a2,2,0,0,0,4,0Z"></path></g></svg>`;
         buttons.appendChild(edit);
         buttons.appendChild(bin);
         right.classList.add("todo-right");
@@ -355,15 +390,25 @@ class uiHandler {
             this.handler.removeTodo(this.handler.getCurrentProjectId(), todoId);
             todoContainer.remove();
         }
+    }
 
-        else if (matchButton.matches(".edit")){
-            this.switchInputs(matchButton.closest(".todo-container"));
+    handleProject (event) {
+        const matchButton = event.target.closest("button");
+
+        if (!matchButton) {
+            const projectId = event.target.closest(".project-card").dataset.id;
+            this.displayProject(projectId);
+        }
+
+        else if (matchButton.matches(".project-bin")) {
+            this.removeProjectComponent = event.target.closest(".project-card");
+            this.removeProjectDialog.showModal();
         }
     }
 
-    displayProject ( event ) {
-        const projectId = event.target.dataset.id;
+    displayProject ( projectId ) {
         this.handler.changeCurrentProjectId(projectId);
+        this.projectName.textContent = this.handler.getCurrentProjectName();
         const todoArray = this.handler.getTodoArray( projectId );
         this.displayTodos(todoArray);
     }
