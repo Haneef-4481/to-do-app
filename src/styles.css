@@ -1,187 +1,302 @@
 :root {
-    --header-bg: #6c0b0b;
-    --header-clr: rgb(255, 218, 218);
-    --body-bg: #270006;
-    --body-clr: #fecdd6;
-    --project-bg: #610606;
-    --project-hover-bg: #7d1414;
-    --project-clr: rgb(230, 206, 206);
-    --todo-bg: rgb(98, 19, 19);
-    --todo-clr: rgb(252, 210, 210);
+  --header-bg: #080b15;
+  --header-clr: rgb(251, 251, 251);
+  --body-bg: transparent;
+  --body-clr: #fecdd6;
+  --project-bg: rgba(255, 255, 255, 0.145);
+  --project-hover-bg: rgba(255, 255, 255, 0.283);
+  --project-clr: rgb(230, 206, 206);
+  --todo-bg: rgba(249, 246, 246, 0.1);
+  --todo-hover-bg: rgba(249, 246, 246, 0.187);
+  --todo-clr: rgb(252, 210, 210);
+}
+
+input,
+textarea,
+select {
+  font-size: 1rem;
+  border: none;
 }
 
 body {
-    display: grid;
-    grid-template: 1fr 5fr / 1fr 5fr;
-    height: 100vh;
-    margin: 0px;
+  display: grid;
+  grid-template: 1fr 5fr / 1fr 5fr;
+  height: 100vh;
+  margin: 0px;
+  background-image: radial-gradient(
+    at bottom left,
+    rgb(43, 105, 182),
+    rgb(1, 1, 18)
+  );
 }
 
 button {
-    cursor: pointer;
-    color: inherit;
-    border: none;
+  cursor: pointer;
+  color: inherit;
+  border: none;
+}
+
+.disabled {
+  display: none;
+}
+
+.sort-buttons {
+  gap: 10px;
+  align-items: center;
+}
+
+.drop-down {
+  cursor: pointer;
+  position: absolute;
+  width: auto;
+}
+
+.items {
 }
 
 .header {
-    background-color: var(--header-bg);
-    color: var(--header-clr);
-    grid-row: 1;
-    grid-column: 1 / 3;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    font-size: 3rem;
-    padding: 0px 30px;
-    box-shadow: 0px 0px 8px rgb(255, 180, 180);
+  background-color: var(--header-bg);
+  color: var(--header-clr);
+  grid-row: 1;
+  grid-column: 1 / 3;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 3rem;
+  padding: 0px 30px;
+  box-shadow: 0px 0px 8px rgb(0, 0, 0);
 }
 
-.header > svg {
-    width: 4rem;
+.logo {
+  width: 4rem;
+}
+
+.logo > rect:nth-of-type(1) {
+  fill: white;
+}
+
+.logo > rect:nth-of-type(2) {
+  fill: rgb(113, 163, 212);
+}
+
+.logo > rect:nth-of-type(3) {
+  fill: rgb(13, 51, 164);
 }
 
 .sidebar {
-    background-color: var(--body-bg);
-    color: var(--project-clr);
-    grid-row: 2;
-    grid-column: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    border-right: 1px solid rgb(224, 175, 175);
+  background-color: var(--body-bg);
+  color: var(--project-clr);
+  grid-row: 2;
+  grid-column: 1;
+  padding: 10px;
+  box-sizing: border-box;
+  border-right: 1px solid rgb(224, 175, 175);
 }
 
 .project-button {
-    color: rgb(255, 213, 213);
-    margin: 10px;
-    padding: 10px;
-    background-color: transparent;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    border: 1px solid rgb(252, 182, 182);
+  color: rgb(6, 20, 44);
+  margin: 10px;
+  padding: 15px;
+  background-color: rgb(202, 225, 229);
+  font-size: 1.4rem;
+  border-radius: 8px;
 }
 
 .project-button:hover {
-    background-color: rgb(123, 33, 33);
+  background-color: rgb(68, 150, 166);
 }
 
 .project-card {
-    background-color: var(--project-bg);
-    margin: 8px;
-    padding: 8px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    font-size: 1.4rem;
-    justify-content: space-between;
+  background-color: var(--project-bg);
+  margin: 8px;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  font-size: 1.4rem;
+  justify-content: space-between;
+  transition: transform 0.5s;
+  overflow: hidden;
 }
 
 .project-card:hover {
-    background-color: var(--project-hover-bg);
+  background-color: var(--project-hover-bg);
+  transform: translateY(-15%);
 }
 
 .project-bin {
-    width: 1.5rem;
+  width: 1.5rem;
 }
 
 .hide-project {
-    display: none;
-    background-color: transparent;
+  display: none;
+  background-color: transparent;
 }
 
 .hide-project > svg {
-    fill: currentColor;
-    stroke: currentColor;
-    width: 1em;
+  fill: currentColor;
+  stroke: currentColor;
+  width: 1em;
 }
 
 .project-card:hover > .hide-project {
-    display: inline-block;
+  display: inline-block;
 }
 
 .list-container {
-    background-color: var(--body-bg);
-    grid-row: 2;
-    grid-column: 2; 
-    padding: 4rem;
+  background-color: var(--body-bg);
+  grid-row: 2;
+  grid-column: 2;
+  padding: 4rem;
 }
 
 #project-name {
-    font-size: 2rem;
-    color: var(--body-clr);
+  font-size: 2rem;
+  color: var(--body-clr);
 }
 
 .top {
-    display: flex;
-    justify-content: space-between;
-    margin: 25px;
+  display: flex;
+  justify-content: space-between;
+  margin: 25px;
+}
+
+.todos {
+  max-height: 45vh;
+  overflow: auto;
+  padding: 0px 50px;
+  scrollbar-color: rgb(0, 0, 21) rgba(255, 255, 255, 0.22);
 }
 
 .todo-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .todo-container {
-    background-color: var(--todo-bg);
-    color: var(--todo-clr);
-    margin: 12px;
-    padding: 10px;
-    border-radius: 8px;
+  background-color: var(--todo-bg);
+  color: var(--todo-clr);
+  margin: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.5s;
+  font-size: 1.5rem;
 }
 
 .todo-container:hover {
-    border: 2px solid rgb(255, 184, 184);
+  box-shadow: inset 0px 0px 0px 2px rgb(212, 43, 43);
+  background-color: var(--todo-hover-bg);
+}
+
+.priority-box {
 }
 
 .todo-button {
-    color: rgb(255, 213, 213);
-    margin: 10px;
-    padding: 10px;
-    background-color: transparent;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    border: 1px solid rgb(252, 182, 182);
+  color: rgb(176, 190, 215);
+  background-color: transparent;
+  margin: 10px;
+  padding: 10px;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: 1px solid rgb(176, 190, 215);
+  transition: transform 0.5s;
+  align-self: center;
 }
 
 .todo-button:hover {
-    background-color: rgb(123, 33, 33);
+  transform: translateY(-10px);
 }
 
 .todo-bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .todo-right {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 .buttons {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .buttons > button {
-    background-color: transparent;
-    border: none;
-    color: inherit;
+  background-color: transparent;
+  border: none;
+  color: inherit;
 }
 
 .buttons svg {
-    width: 1.3rem;
-    stroke: currentColor;
-    fill: currentColor;
-    border-radius: 0.9rem;
-    padding: 0.3rem;
+  width: 1.3rem;
+  stroke: currentColor;
+  fill: currentColor;
+  border-radius: 0.9rem;
+  padding: 0.3rem;
+  transition: transform 0.5s;
 }
 
 .buttons svg:hover {
-    background-color: rgb(148, 52, 52);
+  background-color: rgb(148, 52, 52);
+  transform: scale(1.8, 1.8);
 }
 
-.hidden-description, .hidden {
-    display: none;
+.hidden-description,
+.hidden {
+  display: none;
+}
+
+dialog {
+  background-color: #be4343;
+  border-radius: 20px;
+}
+
+dialog button {
+  background-color: rgb(204, 200, 200);
+  padding: 10px;
+  font-size: 1rem;
+  margin-left: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 3px black;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin: 30px;
+  gap: 10px;
+  font-size: 1.3rem;
+}
+
+input,
+textarea,
+dialog select {
+  background-color: #e19f9f;
+  border: 1px solid rgb(58, 20, 20);
+}
+
+#sorting-drop-down {
+  background-color: rgb(199, 195, 195);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+#sorting-drop-down .items {
+  background-color: rgb(199, 195, 195);
+  margin-left: -10px;
+  border-radius: 0px 0px 10px 10px;
+}
+
+.item {
+  padding: 10px;
+}
+
+#sort-apply {
+  background-color: rgb(218, 167, 167);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px;
 }

@@ -1,89 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hello todos</title>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-            <svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-            <rect width="120" height="120" rx="24" fill="#4F46E5"/>
-            <rect x="30" y="34" width="60" height="8" rx="4" fill="#ffffff" opacity="0.9"/>
-            <rect x="30" y="56" width="60" height="8" rx="4" fill="#ffffff" opacity="0.9"/>
-            <rect x="30" y="78" width="40" height="8" rx="4" fill="#ffffff" opacity="0.6"/>
-            <circle cx="90" cy="82" r="18" fill="#22C55E"/>
-            <path d="M82 82 L88 88 L98 76" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    </svg>
-    <div class="header-title">
+      <svg
+        width="120"
+        height="120"
+        viewBox="0 0 120 120"
+        xmlns="http://www.w3.org/2000/svg"
+        class="logo"
+      >
+        <rect width="120" height="120" rx="24" />
+        <rect x="30" y="34" width="60" height="8" rx="4" opacity="0.9" />
+        <rect x="30" y="56" width="60" height="8" rx="4" opacity="0.9" />
+        <rect x="30" y="78" width="40" height="8" rx="4" opacity="0.9" />
+        <circle cx="90" cy="82" r="18" />
+        <path
+          d="M82 82 L88 88 L98 76"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <div class="header-title">
         <h3>Hello todo</h3>
-    </div>
+      </div>
     </div>
     <div class="sidebar">
-        <button class = "project-button"> + New Project</button>
-        <div class="projects"></div>
+      <button class="project-button">+ New Project</button>
+      <div class="projects"></div>
     </div>
     <div class="list-container">
-        <h3 id="project-name"></h3>
-        <div class="top">
-            <button class="todo-button"> + New Todo</button>
-            <div class="sort-buttons">
-                <select name="sorting" id="sorting">
-                    <option value="default">Default</option>
-                    <option value="priority">By Priority</option>
-                    <option value="date">By Date</option>
-                </select>
-                <button type="button" id = "sort-apply">Apply</button>
+      <h3 id="project-name"></h3>
+      <div class="top">
+        <button class="todo-button">+ New Todo</button>
+        <div class="sort-buttons">
+          <div class="drop-down" id="sorting-drop-down">
+            <div class="selected" data-value="default">Default</div>
+            <div class="items disabled">
+              <div class="item" data-value="default">Default</div>
+              <div class="item" data-value="priority">Priority</div>
+              <div class="item" data-value="date">Date</div>
             </div>
+          </div>
+          <button type="button" id="sort-apply">Apply</button>
         </div>
-        <div class="todos"></div>
+      </div>
+      <div class="todos"></div>
     </div>
-    <dialog class = "todo-dialog">
-        <form action="">
+    <dialog class="todo-dialog">
+      <form action="">
+        <div class="field">
+          <label for="title">Title:</label>
+          <input type="text" id="title" />
+        </div>
 
-            <div class="title">
-                <label for="title">Title</label>
-                <input type="text" id="title">
+        <div class="field">
+          <label for="description">Description:</label>
+          <textarea id="description"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="deadline">Deadline:</label>
+          <input type="datetime-local" id="deadline" />
+        </div>
+
+        <div class="field">
+          <label for="priority">Priority:</label>
+          <div class="drop-down" id="form-drop-down">
+            <div class="selected" data-value="default">High</div>
+            <div class="items disabled">
+              <div class="item" data-value="high">High</div>
+              <div class="item" data-value="medium">Medium</div>
+              <div class="item" data-value="low">Low</div>
             </div>
+          </div>
+        </div>
 
-            <div class="description">
-                <label for="description">Description</label>
-                <textarea id="description"></textarea>
-            </div>
-
-            <div>
-                <label for="deadline">Deadline:</label>
-                <input type="datetime-local" id="deadline">
-            </div>
-
-            <div>
-                <label for="priority">Priority:</label>
-                <select name="priority" id="priority">
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                </select>
-            </div>
-
-            <button class="todo-save" type="button">Save Todo</button>
-
-        </form>
+        <button class="todo-save" type="button">Save Todo</button>
+      </form>
     </dialog>
     <dialog class="project-dialog">
-        <form action="">
-            <div>
-                <label for="name">Name of project:</label>
-                <input type="text" id="name">
-            </div>
-            <button class="project-save" type="button">Save Project</button>
-        </form>
+      <form action="">
+        <div class="field">
+          <label for="name">Name of project:</label>
+          <input type="text" id="name" />
+        </div>
+        <button class="project-save" type="button">Save Project</button>
+      </form>
     </dialog>
     <dialog class="remove-project-dialog">
-        <p>Are you sure about deleting the project ?</p>
-        <div class="buttons">
-            <button type="button" id = "yes">Yes</button>
-            <button type="button" id = "no">No</button>
-        </div>
+      <p>Are you sure about deleting the project ?</p>
+      <div class="check-buttons">
+        <button type="button" id="yes">Yes</button>
+        <button type="button" id="no">No</button>
+      </div>
     </dialog>
-</body>
+  </body>
 </html>
