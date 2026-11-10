@@ -7,28 +7,33 @@
   </head>
   <body>
     <div class="header">
-      <svg
-        width="120"
-        height="120"
-        viewBox="0 0 120 120"
-        xmlns="http://www.w3.org/2000/svg"
-        class="logo"
-      >
-        <rect width="120" height="120" rx="24" />
-        <rect x="30" y="34" width="60" height="8" rx="4" opacity="0.9" />
-        <rect x="30" y="56" width="60" height="8" rx="4" opacity="0.9" />
-        <rect x="30" y="78" width="40" height="8" rx="4" opacity="0.9" />
-        <circle cx="90" cy="82" r="18" />
-        <path
-          d="M82 82 L88 88 L98 76"
-          stroke="currentColor"
-          stroke-width="4"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-      <div class="header-title">
-        <h3>Hello todo</h3>
+      <div class="header-left">
+        <button class="slide">☰</button>
+      </div>
+      <div class="header-right">
+        <svg
+          width="120"
+          height="120"
+          viewBox="0 0 120 120"
+          xmlns="http://www.w3.org/2000/svg"
+          class="logo"
+        >
+          <rect width="120" height="120" rx="24" />
+          <rect x="30" y="34" width="60" height="8" rx="4" opacity="0.9" />
+          <rect x="30" y="56" width="60" height="8" rx="4" opacity="0.9" />
+          <rect x="30" y="78" width="40" height="8" rx="4" opacity="0.9" />
+          <circle cx="90" cy="82" r="18" />
+          <path
+            d="M82 82 L88 88 L98 76"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <div class="header-title">
+          <h3>Hello todo</h3>
+        </div>
       </div>
     </div>
     <div class="sidebar">
@@ -100,6 +105,10 @@
         <button type="button" id="yes">Yes</button>
         <button type="button" id="no">No</button>
       </div>
+    </dialog>
+    <dialog class="validity-message-dialog">
+      <div class="validity-message"></div>
+      <button class="invalid-input-ok">ok</button>
     </dialog>
   </body>
 </html>

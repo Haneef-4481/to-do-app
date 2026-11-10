@@ -137,6 +137,10 @@ class logicHandler {
     return keys[index + 1];
   }
 
+  getDeadline(todoId) {
+    return this.#projects[this.#currProjectId].todos[todoId].deadline;
+  }
+
   toJSON() {
     return { currProjectId: this.#currProjectId, projects: this.#projects };
   }
@@ -175,13 +179,21 @@ class uiHandler {
     this.todoButton = document.querySelector(".todo-button");
     this.todoDialog = document.querySelector(".todo-dialog");
     this.todoForm = document.querySelector(".todo-dialog > form");
+    this.validityMessage = document.querySelector(".validity-message");
+    this.validityMessageDialog = document.querySelector(
+      ".validity-message-dialog",
+    );
     this.todoSaveButton = document.querySelector(".todo-save");
     this.sortDropDown = document.querySelector("#sorting-drop-down");
     this.sortApplyButton = document.querySelector("#sort-apply");
+    this.invalidInputOk = document.querySelector(".invalid-input-ok");
     this.projectName = document.querySelector("#project-name");
     this.removeProjectDialog = document.querySelector(".remove-project-dialog");
     this.removeProjectYes = document.querySelector("#yes");
     this.removeProjectNo = document.querySelector("#no");
+    this.body = document.querySelector("body");
+    this.slide = document.querySelector(".slide");
+    this.sideBar = document.querySelector(".sidebar");
 
     this.projects = document.querySelector(".projects");
     this.todos = document.querySelector(".todos");
@@ -201,6 +213,17 @@ class uiHandler {
     this.removeProjectNo.addEventListener("click", (e) =>
       this.removeProjectDialog.close(),
     );
+    this.invalidInputOk.addEventListener("click", (e) => {
+      this.cleanInvalidInputMessage();
+    });
+    this.validityMessageDialog.addEventListener("close", (e) => {
+      this.validityMessage.textContent = "";
+    });
+    this.slide.addEventListener("click", () => {
+      document.querySelector(".sidebar").classList.add("run");
+      this.sideBar.classList.toggle("sidebar-open");
+      this.slide.classList.toggle("open");
+    });
 
     document.querySelectorAll(".drop-down").forEach((dropDown) => {
       const selected = dropDown.querySelector(".selected");
@@ -260,7 +283,7 @@ class uiHandler {
     }
     const projectId = this.handler.getCurrentProjectId();
     const todoArray = this.handler.getTodoArray(projectId);
-    this.displayTodos(todoArray);
+    this.displayProject(projectId);
   }
 
   displayProjectDialog(e) {
@@ -289,7 +312,11 @@ class uiHandler {
     const priority = this.todoForm
       .querySelector(".selected")
       .textContent.toLowerCase();
-
+    if (this.invalidInputs(deadline)) return;
+    if (this.todos.dataset.empty) {
+      this.todos.dataset.empty = null;
+      this.todos.textContent = "";
+    }
     const todo = new Todo(title, description, deadline, priority);
     this.saveTodoCards(
       title,
@@ -297,6 +324,7 @@ class uiHandler {
       todo.getTimeLeft(),
       priority,
       todoId,
+      deadline,
     );
     this.saveTodoLogic(todoId, todo);
 
@@ -320,9 +348,16 @@ class uiHandler {
     this.displayProject(projectId);
   }
 
-  saveTodoCards(title, description, timeLeft, priority, todoId) {
+  saveTodoCards(title, description, timeLeft, priority, todoId, deadline) {
     this.todos.appendChild(
-      this.produceTodoCard(title, description, priority, timeLeft, todoId),
+      this.produceTodoCard(
+        title,
+        description,
+        priority,
+        timeLeft,
+        todoId,
+        deadline,
+      ),
     );
   }
 
@@ -343,9 +378,10 @@ class uiHandler {
     projectCard.appendChild(bin);
     projectCard.addEventListener("click", (e) => this.handleProject(e));
     this.projects.appendChild(projectCard);
+    this.sideBar.scrollTop = this.sideBar.scrollHeight;
   }
 
-  produceTodoCard(title, description, priority, timeLeft, todoId) {
+  produceTodoCard(title, description, priority, timeLeft, todoId, deadline) {
     const todoContainer = document.createElement("div");
     todoContainer.classList.add("todo-container");
     todoContainer.dataset.id = todoId;
@@ -374,16 +410,16 @@ class uiHandler {
     titl.textContent = title;
     titleInput.value = title;
     titleInput.classList.add("title-input", "hidden", "to-be-hidden");
-    desc.classList.add("description", "hidden-description", "to-be-not-hidden");
+    desc.classList.add("description", "to-be-not-hidden");
     desc.textContent = description;
     descInput.value = description;
     descInput.classList.add("description-input", "hidden", "to-be-hidden");
-    prt.classList.add("priority-box");
+    prt.classList.add(`${priority}-priority`);
     prt.textContent = this.#priorityDisplay[priority.toLowerCase()];
     time.classList.add("time-left", "not-hidden", "to-be-not-hidden");
     time.textContent = timeLeft;
     timeInput.setAttribute("type", "datetime-local");
-    timeInput.value = new Date();
+    timeInput.value = deadline;
     timeInput.classList.add("time-input", "hidden", "to-be-hidden");
     buttons.classList.add("buttons");
     edit.classList.add("edit");
@@ -398,6 +434,7 @@ class uiHandler {
     resetButton.classList.add("reset-todo", "hidden", "to-be-hidden");
     saveButton.textContent = "save";
     resetButton.textContent = "reset";
+    bottomButtons.classList.add("bottom-buttons");
     bottomButtons.appendChild(saveButton);
     bottomButtons.appendChild(resetButton);
     saveButton.addEventListener("click", (e) => this.editTodo(e));
@@ -414,6 +451,7 @@ class uiHandler {
     todoBottom.appendChild(desc);
     todoBottom.appendChild(descInput);
     todoBottom.appendChild(bottomButtons);
+    todoContainer.classList.add("hidden-description");
     todoContainer.appendChild(todoBottom);
     return todoContainer;
   }
@@ -422,20 +460,26 @@ class uiHandler {
     const matchButton = event.target.closest("button");
 
     if (!matchButton) {
-      const desc = event.target
-        .closest(".todo-container")
-        .querySelector(".description");
-      if (!desc.classList.contains("hidden")) {
-        desc.classList.toggle("hidden-description");
+      const container = event.target.closest(".todo-container");
+      if (
+        !container.querySelector(".description").classList.contains("hidden")
+      ) {
+        container.classList.toggle("hidden-description");
       }
     } else if (matchButton.matches(".bin")) {
       const todoContainer = matchButton.closest(".todo-container");
       const todoId = todoContainer.dataset.id;
       this.handler.removeTodo(this.handler.getCurrentProjectId(), todoId);
       todoContainer.remove();
+      if (this.todos.children.length === 0) {
+        this.makeTodosEmpty();
+      }
     } else if (matchButton.matches(".edit")) {
-      const todoContainer = matchButton.closest(".todo-container");
-      const todoId = todoContainer.dataset.id;
+      const container = event.target.closest(".todo-container");
+      if (container.classList.contains("hidden-description")) {
+        container.classList.toggle("hidden-description");
+      }
+      this.switchInputs(event.target.closest(".todo-container"));
     }
   }
 
@@ -460,14 +504,19 @@ class uiHandler {
 
   displayTodos(todoArray) {
     document.querySelector(".todos").textContent = "";
-    for (const [todoId, todo] of todoArray) {
-      this.saveTodoCards(
-        todo.title,
-        todo.description,
-        todo.getTimeLeft(),
-        todo.priority,
-        todoId,
-      );
+    if (todoArray.length) {
+      for (const [todoId, todo] of todoArray) {
+        this.saveTodoCards(
+          todo.title,
+          todo.description,
+          todo.getTimeLeft(),
+          todo.priority,
+          todoId,
+          todo.deadline,
+        );
+      }
+    } else {
+      this.makeTodosEmpty();
     }
   }
 
@@ -478,6 +527,7 @@ class uiHandler {
     const description = todoContainer.querySelector(".description-input").value;
     const todoId = todoContainer.dataset.id;
     const projectId = this.handler.getCurrentProjectId();
+    if (this.invalidInputs(deadline)) return;
     const timeLeft = this.handler.editTodo(
       projectId,
       todoId,
@@ -497,8 +547,9 @@ class uiHandler {
       todoContainer.querySelector(".title").textContent;
     todoContainer.querySelector(".description-input").value =
       todoContainer.querySelector(".description").textContent;
-    todoContainer.querySelector(".time-input").value =
-      todoContainer.querySelector(".time-left").textContent;
+    todoContainer.querySelector(".time-input").value = this.handler.getDeadline(
+      todoContainer.dataset.id,
+    );
   }
 
   switchInputs(todoContainer) {
@@ -526,6 +577,73 @@ class uiHandler {
     }
     todoArray = todoArray.sort(sortFunction);
     this.displayTodos(todoArray);
+  }
+
+  invalidInputs(deadline) {
+    let flag = false;
+    if (deadline && new Date(deadline).getTime() < Date.now()) {
+      const dateInvalid = document.createElement("div");
+      dateInvalid.textContent = "The deadline should be set in future.";
+      this.validityMessage.append(dateInvalid);
+      flag = true;
+    }
+    if (!deadline) {
+      const dateInvalid = document.createElement("div");
+      dateInvalid.textContent = "Please enter a deadline.";
+      this.validityMessage.append(dateInvalid);
+      flag = true;
+    }
+
+    if (flag) {
+      this.validityMessageDialog.showModal();
+    }
+    return flag;
+  }
+
+  cleanInvalidInputMessage() {
+    this.validityMessageDialog.close();
+  }
+
+  makeTodosEmpty() {
+    this.todos.dataset.empty = true;
+    this.todos.innerHTML = `<div class="empty"><svg viewBox="0 0 1024 1024" class="icon" xmlns="http://www.w3.org/2000/svg" fill="#000000">
+  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+  <g id="SVGRepo_iconCarrier">
+    <!-- Book 1 (Top) -->
+    <path d="M813.09 238.24H200.855s-35.86 11.324-35.86 79.27 35.86 81.157 35.86 81.157H813.09s-30.833-13.212-30.833-80.214 30.833-80.213 30.833-80.213z" fill="#DCE9F6"></path>
+    <path d="M836.11 411.167H198.626l-2.092-0.771c-1.798-0.662-44.039-17.096-44.039-92.887 0-76.229 42.775-90.614 44.597-91.189l1.837-0.58H836.11v25H203.434c-5.723 2.987-25.938 17.064-25.938 66.77 0 49.62 20.176 65.117 26.251 68.657H836.11v25z" fill="#08101E"></path>
+    <path d="M256.75 275.988h231.233v18.873H256.75zM390.334 310.933h344.649v23.043H390.334zM262.52 349.398h150.736v23.043H262.52z" fill="#78A3CE"></path>
+
+    <!-- Book 2 (Middle) -->
+    <path d="M907.017 433.246H294.782s-35.86 11.324-35.86 79.27 35.86 81.157 35.86 81.157h612.235s-30.833-13.212-30.833-80.214 30.833-80.213 30.833-80.213z" fill="#DCE9F6"></path>
+    <path d="M930.037 606.173H292.553l-2.092-0.771c-1.798-0.662-44.039-17.096-44.039-92.887 0-76.229 42.775-90.614 44.597-91.189l1.837-0.58h637.182v25H297.36c-5.723 2.987-25.938 17.064-25.938 66.77 0 49.62 20.176 65.117 26.251 68.657h632.364v25z" fill="#08101E"></path>
+    <path d="M354.857 541.566h431.325v23.043H354.857z" fill="#78A3CE"></path>
+
+    <!-- Book 3 (Bottom) -->
+    <path d="M792.055 627.604H179.82s-35.86 11.324-35.86 79.27 35.86 81.157 35.86 81.157h612.235s-30.833-13.212-30.833-80.214 30.833-80.213 30.833-80.213z" fill="#DCE9F6"></path>
+    <path d="M815.075 800.531H177.59l-2.092-0.771c-1.799-0.663-44.038-17.097-44.038-92.887 0-76.229 42.774-90.614 44.595-91.189l1.838-0.58h637.183v25H182.397c-5.723 2.987-25.938 17.064-25.938 66.77 0 49.619 20.175 65.117 26.25 68.657h632.365v25z" fill="#08101E"></path>
+
+    <!-- Pencil Wood Tip -->
+    <path d="M265.709 708.718l-50.263 147.29 153.236-57.634z" fill="#C2D8EC"></path>
+
+    <!-- Pencil Body (Dark & Light Facets) -->
+    <path d="M314.22 744.184l54.462 54.19L697.02 470.635l-51.623-47.93z" fill="#1E5E9E"></path>
+    <path d="M268.266 699.017l54.461 54.19 328.339-327.739-51.623-47.93z" fill="#38BDF8"></path>
+
+    <!-- Eraser (Soft Rose matching the 'Apply' button accent) -->
+    <path d="M645.397 329.934l58.74-57.215 41.085-3.024 52.717 53.485 3.061 42-66.183 67.658z" fill="#EBA0AA"></path>
+
+    <!-- Pencil Outlines & Lead -->
+    <path d="M362.732 805.746l-97.023-97.028a8.645 8.645 0 0 1 0-12.226l422.24-422.237c11.268-11.271 26.55-17.075 42.624-16.073 13.979 0.871 26.973 7.542 36.878 17.445l29.748 29.746c21.576 21.574 21.578 56.555 0.002 78.131L374.957 805.746a8.644 8.644 0 0 1-12.225 0z m-77.039-103.141l83.152 83.158 415.308-415.308c14.343-14.341 14.34-37.686-0.003-52.032l-31.123-31.12c-6.948-6.951-16.187-10.778-26.013-10.778s-19.065 3.827-26.016 10.778L285.693 702.605z" fill="#08101E"></path>
+    <path d="M697.02 470.642l-96.201-96.201 40.744-40.745 96.201 96.201z" fill="#08101E"></path>
+    <path d="M697.02 483.681L587.766 374.432l53.798-53.793 109.249 109.249-53.793 53.793z m-83.151-109.249l83.152 83.152 27.695-27.695-83.152-83.152-27.695 27.695z" fill="#08101E"></path>
+    <path d="M745.703 381.239l-13.049-13.049 18.11-18.107c3.265-3.268 3.265-8.585-0.003-11.853l-8.768-8.771 13.049-13.049 8.771 8.771c10.459 10.465 10.459 27.485 0.003 37.951l-18.113 18.107zM638.998 419.4l13.05 13.048L327.27 757.224l-13.049-13.049z" fill="#08101E"></path>
+    <path d="M199.742 871.713L264 699.379l17.289 6.452-50.139 134.475 134.471-50.14 6.447 17.29z" fill="#08101E"></path>
+    <path d="M215.446 856.008l57.278-25.908-31.37-31.371z" fill="#08101E"></path>
+    <path d="M196.954 874.501l41.489-91.736 50.242 50.241-91.731 41.495z m47.311-59.812l-10.328 22.829 22.829-10.327-12.501-12.502z" fill="#08101E"></path>
+  </g>
+</svg><div class="empty-text">No todos added<div><div>`;
   }
 }
 
