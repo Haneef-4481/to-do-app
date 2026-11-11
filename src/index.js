@@ -308,8 +308,8 @@ class uiHandler {
       .querySelector(".selected")
       .textContent.toLowerCase();
     if (this.invalidInputs(deadline)) return;
-    if (this.todos.dataset.empty) {
-      this.todos.dataset.empty = null;
+    if (this.todos.dataset.empty == "true") {
+      this.todos.dataset.empty = false;
       this.todos.textContent = "";
     }
     const todo = new Todo(title, description, deadline, priority);
@@ -499,6 +499,7 @@ class uiHandler {
   displayTodos(todoArray) {
     document.querySelector(".todos").textContent = "";
     if (todoArray.length) {
+      this.todos.dataset.empty = false;
       for (const [todoId, todo] of todoArray) {
         this.saveTodoCards(
           todo.title,
