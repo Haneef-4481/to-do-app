@@ -408,7 +408,7 @@ class uiHandler {
     desc.textContent = description;
     descInput.value = description;
     descInput.classList.add("description-input", "hidden", "to-be-hidden");
-    prt.classList.add(`${priority}-priority`);
+    prt.classList.add(`${priority.toLowerCase()}-priority`);
     prt.textContent = this.#priorityDisplay[priority.toLowerCase()];
     time.classList.add("time-left", "not-hidden", "to-be-not-hidden");
     time.textContent = timeLeft;
