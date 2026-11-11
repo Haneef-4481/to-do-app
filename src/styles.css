@@ -145,7 +145,7 @@ button {
   grid-row: 2;
   padding: 10px;
   box-sizing: border-box;
-  border-right: 1px solid rgb(224, 175, 175);
+  border: 1px solid rgb(224, 175, 175);
   min-width: 0px;
   scrollbar-color: rgb(3, 3, 41) rgba(255, 255, 255, 0.468);
   overflow: auto;
@@ -155,9 +155,10 @@ button {
   margin: auto;
   z-index: 3;
   height: 80vh;
-  transform: translate(-100%);
+  transform: translate(-101%);
   font-size: clamp(0.8rem, 0.8rem + 1vw, 1.5rem);
   width: max(200px, 20%);
+  box-shadow: 2px 2px 15px black;
 }
 
 .sidebar.sidebar-open {
