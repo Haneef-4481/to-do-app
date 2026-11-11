@@ -378,10 +378,6 @@ button {
 .hidden {
   display: none;
 }
-.drop-down dialog {
-  background-color: #be4343;
-  border-radius: 20px;
-}
 
 dialog {
   background-color: #666d86;

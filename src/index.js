@@ -261,7 +261,7 @@ class uiHandler {
         const todo = new Todo(
           "A title",
           "A description goes here",
-          "2026-08-30T14:30",
+          "2026-12-30T14:30",
           "High",
         );
         const todoId = Math.random().toString(36).substring(2, 9);
