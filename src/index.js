@@ -265,14 +265,8 @@ class uiHandler {
           "High",
         );
         const todoId = Math.random().toString(36).substring(2, 9);
-        this.saveTodoCards(
-          "title",
-          "description",
-          todo.getTimeLeft(),
-          "High",
-          todoId,
-        );
         this.saveTodoLogic(todoId, todo);
+        this.displayProject(projectId);
       }
     }
   }
