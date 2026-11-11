@@ -202,9 +202,10 @@ class uiHandler {
       this.displayProjectDialog(e),
     );
     this.todoButton.addEventListener("click", (e) => this.displayTodoDialog(e));
-    this.projectSaveButton.addEventListener("click", (e) =>
-      this.saveProject(e),
-    );
+    this.projectSaveButton.addEventListener("click", (e) => {
+      this.saveProject(e);
+      this.sideBar.scrollTop = this.sideBar.scrollHeight;
+    });
     this.todoSaveButton.addEventListener("click", (e) => this.saveTodo(e));
     this.sortApplyButton.addEventListener("click", (e) => this.sortTodos(e));
     this.removeProjectYes.addEventListener("click", (e) =>
@@ -378,7 +379,6 @@ class uiHandler {
     projectCard.appendChild(bin);
     projectCard.addEventListener("click", (e) => this.handleProject(e));
     this.projects.appendChild(projectCard);
-    this.sideBar.scrollTop = this.sideBar.scrollHeight;
   }
 
   produceTodoCard(title, description, priority, timeLeft, todoId, deadline) {
